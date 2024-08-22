@@ -5,13 +5,6 @@ use defmt::{write, Format, Formatter};
 
 #[cfg_attr(feature = "with_defmt", derive(Format))]
 #[derive(Debug)]
-pub enum BusError<SPIError, CSError> {
-    Spi(SPIError),
-    Pin(CSError),
-}
-
-#[cfg_attr(feature = "with_defmt", derive(Format))]
-#[derive(Debug)]
 pub enum CalibrationError {
     Alpha,
     Beta,
@@ -19,19 +12,13 @@ pub enum CalibrationError {
 }
 
 #[derive(Debug)]
-pub enum Error<E> {
+pub enum Error<SpiError> {
     /// SPI bus error
-    Bus(E),
+    Spi(SpiError),
     /// Error when calculating new calibration values
     Calibration(CalibrationError),
     /// Delay error
     Delay,
-}
-
-impl<SPIError, CSError> From<CSError> for Error<BusError<SPIError, CSError>> {
-    fn from(e: CSError) -> Self {
-        Self::Bus(BusError::Pin(e))
-    }
 }
 
 #[cfg(feature = "with_defmt")]
