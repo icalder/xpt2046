@@ -25,7 +25,7 @@ pub enum Error<SpiError> {
 impl<E> Format for Error<E> {
     fn format(&self, fmt: Formatter) {
         match self {
-            Error::Bus(_) => write!(fmt, "Bus error"),
+            Error::Spi(_) => write!(fmt, "Bus error"),
             Error::Calibration(e) => write!(fmt, "Error when calculating calibration for: {}", e),
             Error::Delay => write!(fmt, "Delay error"),
         }
