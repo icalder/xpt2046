@@ -20,21 +20,14 @@
 //!
 
 use crate::calibration::{calculate_calibration, calibration_draw_point};
-pub use crate::{
-    calibration::CalibrationPoint,
-    error::Error,
-    exti_pin::Xpt2046Exti,
-};
+pub use crate::{calibration::CalibrationPoint, error::Error, exti_pin::Xpt2046Exti};
 use core::{fmt::Debug, ops::RemAssign};
 use embedded_graphics_core::{
     draw_target::DrawTarget,
     geometry::Point,
     pixelcolor::{Rgb565, RgbColor},
 };
-use embedded_hal::{
-    delay::DelayNs,
-    spi::SpiDevice,
-};
+use embedded_hal::{delay::DelayNs, spi::SpiDevice};
 
 #[cfg(feature = "with_defmt")]
 use defmt::Format;
@@ -216,9 +209,7 @@ where
     }
 
     fn spi_read(&mut self, buf: &mut [u8]) -> Result<(), Error<SPI::Error>> {
-        self.spi
-            .transfer_in_place(buf)
-            .map_err(|e| Error::Spi(e))
+        self.spi.transfer_in_place(buf).map_err(|e| Error::Spi(e))
     }
 
     /// Read raw values from the XPT2046 driver
@@ -284,11 +275,8 @@ where
     }
 
     /// Reset the driver
-    pub fn init<D: DelayNs>(
-        &mut self,
-        delay: &mut D,
-    ) -> Result<(), Error<SPI::Error>> {
-        self.spi_read(& mut [0x80, 0, 0, 0, 0])?;
+    pub fn init<D: DelayNs>(&mut self, delay: &mut D) -> Result<(), Error<SPI::Error>> {
+        self.spi_read(&mut [0x80, 0, 0, 0, 0])?;
         delay.delay_ms(1);
 
         Ok(())
@@ -297,10 +285,7 @@ where
     /// Continually runs and and collects the touch data from xpt2046.
     /// You should drive this either in some main loop or dedicated timer
     /// interrupt
-    pub fn run(
-        &mut self,
-        exti: &mut PinIRQ::Exti,
-    ) -> Result<(), Error<SPI::Error>> {
+    pub fn run(&mut self, exti: &mut PinIRQ::Exti) -> Result<(), Error<SPI::Error>> {
         match self.screen_state {
             TouchScreenState::IDLE => {
                 if self.operation_mode == TouchScreenOperationMode::CALIBRATION && self.irq.is_low()
@@ -463,5 +448,14 @@ where
         self.operation_mode = TouchScreenOperationMode::NORMAL;
 
         Ok(())
+    }
+
+    pub fn get_calibration_data(&self) -> &CalibrationData {
+        &self.calibration_data
+    }
+
+    pub fn set_calibration_data(mut self, data: CalibrationData) -> Self {
+        self.calibration_data = data;
+        self
     }
 }
